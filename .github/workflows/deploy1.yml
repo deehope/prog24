@@ -1,0 +1,31 @@
+name: Deploy1
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      run: |
+        git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git checkout ${{ github.head_ref }}
+      
+    - name: Create new file
+      run: |
+        echo "file" > file.txt
+        date >> file.txt
+        echo "Pull Request: ${{ github.event.pull_request.number }}" >> file.txt
+      
+    - name: Commit and push changes
+      run: |
+        git add file.txt
+        git commit -m "file  ${{ github.event.pull_request.number }}"
+        git push origin HEAD:${{ github.head_ref }}
+
+      
