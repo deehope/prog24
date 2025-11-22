@@ -1,31 +1,42 @@
-name: Deploy1
+name: DP
 
 on:
   pull_request:
-    types: [opened]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
-      run: |
-        git clone https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
-        git checkout ${{ github.head_ref }}
-      
-    - name: Create new file
-      run: |
-        echo "file" > file.txt
-        date >> file.txt
-        echo "Pull Request: ${{ github.event.pull_request.number }}" >> file.txt
-      
-    - name: Commit and push changes
-      run: |
-        git add file.txt
-        git commit -m "file  ${{ github.event.pull_request.number }}"
-        git push origin HEAD:${{ github.head_ref }}
+      - name: Клонируем репозиторий
+        run: |
+          git clone https://github.com/${{ github.repository }} repo
+          cd repo
+          echo "Репозиторий склонирован"
+
+      - name: Создаём файл
+        run: |
+          cd repo
+          echo "Этот файл создан в GitHub Actions" > test.txt
+
+      - name: Конфигур
+        run: |
+          cd repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Добавляем и коммитим файл
+        run: |
+          cd repo
+          git add test.txt
+          git commit -m "Add test"
+
+      - name: Пушим изменения
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd repo
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
 
       
